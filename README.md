@@ -1,2 +1,2 @@
 # geo-labels
-Учебный проект курса "Комплексный JavaScript" в Loftschool
+## Учебный проект курса "Комплексный JavaScript" в Loftschool
