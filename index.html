@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Geo-labels</title>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+    <div id="review_form" class="review__form">
+        <div id="review_title" class="review__title">
+            <i class="fa fa-map-marker"></i>
+            <span id="address" class="review__address"></span>
+            <i class="fa fa-times" id="close_form"></i>
+        </div>
+        <div id="review_content" class="review__content">
+            <span id="empty_message">Отзывов пока нет...</span>
+        </div>
+        <div class="review__label">ВАШ ОТЗЫВ</div>
+        <input class="review__item review__item--input" placeholder="Ваше имя" type="text" id="reviewer_name">
+        <input class="review__item review__item--input" placeholder="Укажите место" type="text" id="place">
+        <textarea class="review__item review__item--textarea" rows="4" placeholder="Поделитесь впечатлениями" id="review_text">
+        </textarea>
+        <button class="button" id="saveBtn">Добавить</button>
+    </div>
+    <div id="map"></div>
+    <script src="js/entry.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+body, html {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Fira Sans', sans-serif;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    margin: 0;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.review__form {
+    font-size: 12px;
+    position: absolute;
+    top: 100px;
+    left: 200px;
+    height: 450px;
+    width: 300px;
+    background-color: #fff;
+    z-index: 1000;
+    border-radius: 5px;
+    padding: 5px 5px 5px 10px;
+    display: none;
+}
+
+.review__title {
+    font-size: 10px;
+    background-color: #ff8563;
+    border-radius: 5px 5px 0 0;
+    color: #fff;
+    padding: 10px 3px 3px 10px;
+    min-height: 20px;
+    line-height: 1;
+    /*cursor: all-scroll;*/
+}
+
+.fa {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; }
+
+.fa-map-marker {
+    margin-right: 5px;
+}
+
+.fa-times {
+    float: right;
+    font-size: 14px;
+    position: absolute;
+    top: 4px;
+    right: -3px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+}
+
+.fa-times:before {
+    content: ""; }
+
+.fa-map-marker:before {
+    content: ""; }
+
+.review__content {
+    height: 38%;
+    overflow-y: auto;
+}
+.review__label {
+    color: #ff8563;
+}
+.review__item {
+    padding: 5px 8px;
+    margin-bottom: 10px;
+}
+.review__item--input {
+    height: 24px;
+    border-radius: 12px;
+    outline: none;
+    border: 1px solid #ccc;
+    width: 95%;
+    /*padding: 0 5px;*/
+    font-size: 12px;
+}
+.review__item--textarea {
+    outline: none;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    width: 95%;
+    font-size: 12px;
+    /*padding: 5px;*/
+    line-height: 1.5;
+}
+
+.button {
+    cursor: pointer;
+    width: 74px;
+    height: 28px;
+    color: #ffffff;
+    -webkit-border-radius: 10px;
+    border-radius: 8px;
+    background-color: #ff8563;
+    border: none;
+    float: right;
+    outline: none;
+    font-size: 12px;
+    margin-right: 10px;
+}
