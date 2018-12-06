@@ -56,6 +56,10 @@ function init () {
     }
 
     function showForm(position, address) {
+        addressElement.textContent = address;
+        fillReviewList(address);
+        reviewerName.focus();
+
         let {x, y} = position;
 
         x = x < 0 ? 0 : x;
@@ -66,16 +70,10 @@ function init () {
         if (y + reviewForm.offsetHeight > document.documentElement.clientHeight) {
             y = document.documentElement.clientHeight - reviewForm.offsetHeight - 10;
         }
-
-        addressElement.textContent = address;
-        fillReviewList(address);
-
         reviewForm.style.left = x +'px';
         reviewForm.style.top = y + 'px';
         reviewForm.style.display = 'block';
         reviewForm.style.zIndex = '10';
-
-        reviewerName.focus();
     }
 
     function saveReview() {
