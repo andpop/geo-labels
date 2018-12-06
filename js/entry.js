@@ -1,13 +1,10 @@
-console.log("In entry.js");
-
 ymaps.ready(init);
 
 function init () {
     let reviewForm = document.getElementById('review_form'),
-        reviewTitle = document.getElementById('review_title'),
-        address = document.getElementById('address'),
+        addressElement = document.getElementById('address'),
         closeFormBtn = document.getElementById('close_form'),
-        reviewContent = document.getElementById('review_content'),
+        reviewList = document.getElementById('review_list'),
         emptyMessage = document.getElementById('empty_message'),
         reviewerName = document.getElementById('reviewer_name'),
         reviewPlace = document.getElementById('place'),
@@ -17,26 +14,48 @@ function init () {
     let activeReview = {};
     let reviews = [];
 
-    function clearForm() {
+    function clearInputs() {
         reviewerName.value = '';
-        place.value = '';
+        reviewPlace.value = '';
         reviewText.value = '';
     }
 
-    function clearList() {
-        emptyMessage.style.display = 'block';
-        while (reviewContent.children.length > 1) {
-            reviewContent.removeChild(reviewContent.lastChild);
-        }
-    }
-
-    function closeForm() {
-        reviewForm.style.display = 'none';
-        clearForm();
+    function clearForm() {
+        address.textContent = '';
+        clearInputs();
         clearList();
     }
 
-    function showForm(position) {
+    function clearList() {
+        reviewList.innerHTML = '';
+        emptyMessage.style.display = 'block';
+    }
+
+    function closeForm() {
+        clearForm();
+        clearList();
+        reviewForm.style.display = 'none';
+    }
+
+    function fillReviewList(address) {
+        reviewList.innerHTML = '';
+        for (let review of reviews) {
+            if (review.address === address) {
+                emptyMessage.style.display = 'none';
+                activeReview.address = review.address;
+                activeReview.coords = review.coords;
+
+                let reviewItem = `<li>
+                <span class="username">${review.reviewer} </span>
+                <span class="place"> ${review.place}</span> <span class="date">${review.date}</span>
+                <div class="reviewtext">${review.text}</div>
+                </li>`;
+                reviewList.innerHTML += reviewItem;
+            }
+        }
+    }
+
+    function showForm(position, address) {
         let {x, y} = position;
 
         x = x < 0 ? 0 : x;
@@ -47,17 +66,57 @@ function init () {
         if (y + reviewForm.offsetHeight > document.documentElement.clientHeight) {
             y = document.documentElement.clientHeight - reviewForm.offsetHeight - 10;
         }
+
+        addressElement.textContent = address;
+        fillReviewList(address);
+
         reviewForm.style.left = x +'px';
         reviewForm.style.top = y + 'px';
         reviewForm.style.display = 'block';
         reviewForm.style.zIndex = '10';
-        address.textContent = activeReview.address;
+
         reviewerName.focus();
     }
 
+    function saveReview() {
+        activeReview.reviewer = reviewerName.value;
+        activeReview.place = reviewPlace.value;
+        activeReview.text = reviewText.value;
+        activeReview.date = new Date().toLocaleString();
 
+        if (!activeReview.reviewer || !activeReview.place || !activeReview.text) {
+            return;
+        }
+
+        reviews.push(Object.assign({}, activeReview));
+
+        let header = '<div class="where">' + activeReview.place + '</div><div class="address">' + activeReview.address + '</div>';
+        let placemark = new ymaps.Placemark(activeReview.coords, {
+            balloonContentHeader: header,
+            balloonContentBody: activeReview.text,
+            balloonContentFooter: activeReview.date,
+            hintContent: '<b>' + activeReview.reviewer + '</b> ' + activeReview.place
+        }, {
+            preset: 'islands#redIcon',
+            iconColor: '#df6543',
+            openBalloonOnClick: false
+        });
+        let address = activeReview.address;
+
+        placemark.events.add('click', (e) => {
+            showForm(e.get('position'), address);
+        });
+
+        clusterer.add(placemark);
+
+        fillReviewList(activeReview.address);
+        clearInputs();
+    }
+
+    saveBtn.addEventListener('click', saveReview);
     closeFormBtn.addEventListener('click', closeForm);
 
+    // -----------------------------------------------------------------------------------------
     let myMap = new ymaps.Map('map', {
         center   : [54.17523457, 45.18074950], // Саранск
         zoom     : 16,
@@ -74,63 +133,16 @@ function init () {
     myMap.events.add('click', e => {
         let coords = e.get('coords');
         let position = e.get('position');
-        console.log(coords);
 
-        address.textContent = '';
         clearForm();
-        clearList();
 
-        ymaps.geocode(coords).then(res => {
-            console.log(res.geoObjects.get(0).getAddressLine());
-            activeReview.coords = coords;
-            activeReview.address = res.geoObjects.get(0).getAddressLine();
-            showForm(position);
-        })
+        ymaps.geocode(coords)
+            .then(res => {
+                activeReview.coords = coords;
+                activeReview.address = res.geoObjects.get(0).getAddressLine();
+                showForm(position, activeReview.address);
+            })
             .catch(err => console.log(err));
     });
 
-    function saveReview() {
-        let reviewer = reviewerName.value,
-            place = reviewPlace.value,
-            text = reviewText.value;
-
-        if (!reviewer || !place || !text) {
-            return;
-        }
-        activeReview.reviewer = reviewer;
-        activeReview.place = place;
-        activeReview.text = text;
-        activeReview.date = new Date().toLocaleString();
-        reviews.push(Object.assign({}, activeReview));
-
-        emptyMessage.style.display = 'none';
-        let reviewHTML = `<div>
-            <span class="username">${activeReview.reviewer} </span>
-            <span class="place"> ${activeReview.place}</span> <span class="date">${activeReview.date}</span>
-            <div class="reviewtext">${activeReview.text}</div>
-            </div>`;
-
-        // reviewContent.innerHTML += reviewTmpl({ review: activeReview });
-        reviewContent.innerHTML += reviewHTML;
-        clearForm();
-        let header = '<div class="where">' + place + '</div><div class="address">' + activeReview.address + '</div>';
-        let placemark = new ymaps.Placemark(activeReview.coords, {
-            balloonContentHeader: header,
-            balloonContentBody: text,
-            balloonContentFooter: activeReview.date,
-            hintContent: '<b>' + reviewer + '</b> ' + place
-        }, {
-            preset: 'islands#redIcon',
-            iconColor: '#df6543',
-            openBalloonOnClick: false
-        });
-        let address = activeReview.address;
-
-        placemark.events.add('click', (e) => {
-            // showAllReviews (address, e.get('position'))
-        });
-        clusterer.add(placemark);
-    }
-
-    saveBtn.addEventListener('click', saveReview);
 }

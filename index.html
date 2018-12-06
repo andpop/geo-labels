@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Geo-labels</title>
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=711c1e08-0b8e-4778-a763-152c4471b2e2&lang=ru_RU" type="text/javascript"></script>
+    <!--<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>-->
+
+
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -11,13 +14,14 @@
 </head>
 <body>
     <div id="review_form" class="review__form">
-        <div id="review_title" class="review__title">
+        <div class="review__title">
             <i class="fa fa-map-marker"></i>
             <span id="address" class="review__address"></span>
             <i class="fa fa-times" id="close_form"></i>
         </div>
-        <div id="review_content" class="review__content">
+        <div class="reviews__container">
             <span id="empty_message">Отзывов пока нет...</span>
+            <ul class="review__list" id="review_list"></ul>
         </div>
         <div class="review__label">ВАШ ОТЗЫВ</div>
         <input class="review__item review__item--input" placeholder="Ваше имя" type="text" id="reviewer_name">
