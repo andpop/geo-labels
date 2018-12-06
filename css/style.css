@@ -156,3 +156,34 @@ p {
     margin-right: 10px;
 }
 
+.balloon_header,
+.balloon_body,
+.balloon_footer
+{
+    font-size: 10px;
+}
+
+.balloon_body {
+    max-height: 70px;
+    overflow-y: auto;
+}
+
+.balloon_footer {
+    position: absolute;
+    bottom: 5px;
+    right: 0;
+    color: #999;
+}
+
+.where {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.address {
+    color:blue;
+    text-decoration: underline;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+

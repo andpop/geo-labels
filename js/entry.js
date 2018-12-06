@@ -113,6 +113,20 @@ function init () {
 
     saveBtn.addEventListener('click', saveReview);
     closeFormBtn.addEventListener('click', closeForm);
+    //Обработка клика на адрес (класс address) в балуне-карусели для кластера
+    map.addEventListener('click', e => {
+        let target = e.target;
+
+        if (target.className != 'address') {
+            return;
+        }
+        myMap.balloon.close();
+        const x = e.clientX;
+        const y = e.clientY;
+
+        showForm([x, y], target.textContent);
+    });
+
 
     // -----------------------------------------------------------------------------------------
     let myMap = new ymaps.Map('map', {
@@ -121,10 +135,32 @@ function init () {
         behaviors: ['drag']
     });
     myMap.controls.add('zoomControl');
+
+    // Создаем собственный макет с информацией о выбранном геообъекте.
+    let customItemContentLayout = ymaps.templateLayoutFactory.createClass(
+        // Флаг "raw" означает, что данные вставляют "как есть" без экранирования html.
+        '<div class=balloon_header>{{ properties.balloonContentHeader|raw }}</div>' +
+        '<div class=balloon_body>{{ properties.balloonContentBody|raw }}</div>' +
+        '<div class=balloon_footer>{{ properties.balloonContentFooter|raw }}</div>'
+    );
     let clusterer = new ymaps.Clusterer({
-        preset: 'islands#invertedVioletClusterIcons',
+        preset: 'islands#invertedDarkOrangeClusterIcons',
+        openBalloonOnClick: true,
         clusterDisableClickZoom: true,
-        openBalloonOnClick: false
+        clusterOpenBalloonOnClick: true,
+        clusterHideIconOnBalloonOpen: false,
+        // Устанавливаем стандартный макет балуна кластера "Карусель".
+        clusterBalloonContentLayout: 'cluster#balloonCarousel',
+        // Устанавливаем собственный макет.
+        clusterBalloonItemContentLayout: customItemContentLayout,
+        // Устанавливаем режим открытия балуна.
+        // В данном примере балун никогда не будет открываться в режиме панели.
+        clusterBalloonPanelMaxMapArea: 0,
+        // Устанавливаем размеры макета контента балуна (в пикселях).
+        clusterBalloonContentLayoutWidth: 200,
+        clusterBalloonContentLayoutHeight: 130,
+        // Устанавливаем максимальное количество элементов в нижней панели на одной странице
+        clusterBalloonPagerSize: 5
     });
     myMap.geoObjects.add(clusterer);
 
