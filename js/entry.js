@@ -11,8 +11,8 @@ function init () {
         reviewText = document.getElementById('review_text'),
         saveBtn = document.getElementById('saveBtn');
 
-    let activeReview = {};
-    let reviews = [];
+    let activeReview = {}, // Объект для хранения информации о текущем отзыве
+        reviews = [];      // Массив для хранения всех отзывов
 
     function clearInputs() {
         reviewerName.value = '';
@@ -76,24 +76,26 @@ function init () {
         reviewForm.style.zIndex = '10';
     }
 
-    function saveReview() {
+    function addReview() {
         activeReview.reviewer = reviewerName.value;
         activeReview.place = reviewPlace.value;
         activeReview.text = reviewText.value;
         activeReview.date = new Date().toLocaleString();
 
+        // Если не заполнено хотя бы одно поле, то ничего не делаем
         if (!activeReview.reviewer || !activeReview.place || !activeReview.text) {
             return;
         }
 
+        // Добавляем новый отзыв в список всех отзывов
         reviews.push(Object.assign({}, activeReview));
 
-        let header = '<div class="where">' + activeReview.place + '</div><div class="address">' + activeReview.address + '</div>';
+        let header = `<div class="balloon__place"> ${activeReview.place} </div><div class="balloon__address">${activeReview.address}</div>`;
         let placemark = new ymaps.Placemark(activeReview.coords, {
             balloonContentHeader: header,
             balloonContentBody: activeReview.text,
             balloonContentFooter: activeReview.date,
-            hintContent: '<b>' + activeReview.reviewer + '</b> ' + activeReview.place
+            hintContent: `<b>${activeReview.reviewer}</b> ${activeReview.place}`
         }, {
             preset: 'islands#redIcon',
             iconColor: '#df6543',
@@ -101,30 +103,32 @@ function init () {
         });
         let address = activeReview.address;
 
+        // Обработчик щелчка на новом placemark
         placemark.events.add('click', (e) => {
             showForm(e.get('position'), address);
         });
 
+        // Делаем placemark доступным для кластеризации
         clusterer.add(placemark);
 
+        // Формируем и отображаем список всех отзывов по данному адресу
         fillReviewList(activeReview.address);
         clearInputs();
     }
 
-    saveBtn.addEventListener('click', saveReview);
+    saveBtn.addEventListener('click', addReview);
     closeFormBtn.addEventListener('click', closeForm);
     //Обработка клика на адрес (класс address) в балуне-карусели для кластера
     map.addEventListener('click', e => {
         let target = e.target;
 
-        if (target.className != 'address') {
-            return;
-        }
-        myMap.balloon.close();
-        const x = e.clientX;
-        const y = e.clientY;
+        if (target.className === 'balloon__address') {
+            myMap.balloon.close();
+            const x = e.clientX;
+            const y = e.clientY;
 
-        showForm([x, y], target.textContent);
+            showForm([x, y], target.textContent);
+        }
     });
 
 
@@ -139,9 +143,9 @@ function init () {
     // Создаем собственный макет с информацией о выбранном геообъекте.
     let customItemContentLayout = ymaps.templateLayoutFactory.createClass(
         // Флаг "raw" означает, что данные вставляют "как есть" без экранирования html.
-        '<div class=balloon_header>{{ properties.balloonContentHeader|raw }}</div>' +
-        '<div class=balloon_body>{{ properties.balloonContentBody|raw }}</div>' +
-        '<div class=balloon_footer>{{ properties.balloonContentFooter|raw }}</div>'
+        '<div class=balloon__header>{{ properties.balloonContentHeader|raw }}</div>' +
+        '<div class=balloon__body>{{ properties.balloonContentBody|raw }}</div>' +
+        '<div class=balloon__footer>{{ properties.balloonContentFooter|raw }}</div>'
     );
     let clusterer = new ymaps.Clusterer({
         preset: 'islands#invertedDarkOrangeClusterIcons',
@@ -164,9 +168,10 @@ function init () {
     });
     myMap.geoObjects.add(clusterer);
 
+    // По щелчку на карте определяется адрес точки и открывается форма с отзывами по этому адресу
     myMap.events.add('click', e => {
-        let coords = e.get('coords');
-        let position = e.get('position');
+        let coords = e.get('coords'), // Географические координаты точки
+            position = e.get('position'); // Компьютерные координаты точки на экране
 
         clearForm();
 
