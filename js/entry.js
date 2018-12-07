@@ -11,8 +11,8 @@ function init () {
         reviewText = document.getElementById('review_text'),
         saveBtn = document.getElementById('saveBtn');
 
-    let activeReview = {}, // Объект для хранения информации о текущем отзыве
-        reviews = [];      // Массив для хранения всех отзывов
+    let currentReview = {}, // Объект для хранения информации о текущем отзыве
+        allReviews = [];      // Массив для хранения всех отзывов
 
     // ==============  Определение функций ================================================
     function clearInputs() {
@@ -40,11 +40,11 @@ function init () {
 
     function fillReviewList(address) {
         reviewList.innerHTML = '';
-        for (let review of reviews) {
+        for (let review of allReviews) {
             if (review.address === address) {
                 emptyMessage.style.display = 'none';
-                activeReview.address = review.address;
-                activeReview.coords = review.coords;
+                currentReview.address = review.address;
+                currentReview.coords = review.coords;
 
                 let reviewItem = `<li>
                 <span class="username">${review.reviewer} </span>
@@ -91,7 +91,7 @@ function init () {
             iconColor: '#df6543',
             openBalloonOnClick: false
         });
-        // let address = activeReview.address;
+        // let address = currentReview.address;
 
         // Обработчик щелчка на новом placemark
         placemark.events.add('click', (e) => {
@@ -102,23 +102,37 @@ function init () {
         clusterer.add(placemark);
     }
 
+    function fillCurrentReview() {
+        currentReview.reviewer = reviewerName.value;
+        currentReview.place = reviewPlace.value;
+        currentReview.text = reviewText.value;
+        currentReview.date = new Date().toLocaleString();
+    }
+
+    function saveReviewsToStorage() {
+        localStorage.geo_reviews = JSON.stringify(allReviews);
+    }
+    
+    function loadReviewsFromStorage() {
+        return localStorage.geo_reviews ? JSON.parse(localStorage.geo_reviews) : {};
+    }
+    
     function addReview() {
-        activeReview.reviewer = reviewerName.value;
-        activeReview.place = reviewPlace.value;
-        activeReview.text = reviewText.value;
-        activeReview.date = new Date().toLocaleString();
+        // Заполняем currentReview значениями из полей ввода формы
+        fillCurrentReview();
 
         // Если не заполнено хотя бы одно поле, то ничего не делаем
-        if (!activeReview.reviewer || !activeReview.place || !activeReview.text) {
+        if (!currentReview.reviewer || !currentReview.place || !currentReview.text) {
             return;
         }
 
         // Добавляем новый отзыв в массив reviews всех отзывов
-        reviews.push(Object.assign({}, activeReview));
+        allReviews.push(Object.assign({}, currentReview));
+        saveReviewsToStorage();
         // Добавляем placemark на карту
-        addPlacemark(activeReview);
+        addPlacemark(currentReview);
         // Формируем и отображаем в форме список всех отзывов по данному адресу
-        fillReviewList(activeReview.address);
+        fillReviewList(currentReview.address);
         // Очищаем поля ввода
         clearInputs();
     }
@@ -164,6 +178,9 @@ function init () {
     let clusterer = getClustererWithCarousel();
     myMap.geoObjects.add(clusterer);
 
+    allReviews = loadReviewsFromStorage();
+    allReviews.forEach((review, i, reviews) => addPlacemark(review));
+
     // ====================   Настройка обработчиков событий для элементов карты ================================
     // По щелчку на карте определяется адрес точки и открывается форма с отзывами по этому адресу
     myMap.events.add('click', e => {
@@ -173,9 +190,9 @@ function init () {
         clearForm();
         ymaps.geocode(coords)
             .then(res => {
-                activeReview.coords = coords;
-                activeReview.address = res.geoObjects.get(0).getAddressLine();
-                showForm(position, activeReview.address);
+                currentReview.coords = coords;
+                currentReview.address = res.geoObjects.get(0).getAddressLine();
+                showForm(position, currentReview.address);
             })
             .catch(err => console.error(err));
     });
