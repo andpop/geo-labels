@@ -23,12 +23,14 @@
             <span id="empty_message">Отзывов пока нет...</span>
             <ul class="review__list" id="review_list"></ul>
         </div>
-        <div class="review__label">ВАШ ОТЗЫВ</div>
-        <input class="review__item review__item--input" placeholder="Ваше имя" type="text" id="reviewer_name">
-        <input class="review__item review__item--input" placeholder="Укажите место" type="text" id="place">
-        <textarea class="review__item review__item--textarea" rows="4" placeholder="Поделитесь впечатлениями" id="review_text">
-        </textarea>
-        <button class="button" id="saveBtn">Добавить</button>
+        <div class="new-review">
+            <div class="review__label">ВАШ ОТЗЫВ</div>
+            <input class="review__item review__item--input" placeholder="Ваше имя" type="text" id="reviewer_name">
+            <input class="review__item review__item--input" placeholder="Укажите место" type="text" id="place">
+            <textarea class="review__item review__item--textarea" rows="4" placeholder="Поделитесь впечатлениями" id="review_text">
+            </textarea>
+            <button class="button" id="saveBtn">Добавить</button>
+        </div>
     </div>
     <div id="map"></div>
     <script src="js/entry.js"></script>

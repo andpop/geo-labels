@@ -48,7 +48,7 @@ function init () {
                 let reviewItem = `<li>
                 <span class="username">${review.reviewer} </span>
                 <span class="place"> ${review.place}</span> <span class="date">${review.date}</span>
-                <div class="reviewtext">${review.text}</div>
+                <div class="review-text">${review.text}</div>
                 </li>`;
                 reviewList.innerHTML += reviewItem;
             }
