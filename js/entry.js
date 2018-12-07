@@ -14,6 +14,7 @@ function init () {
     let activeReview = {}, // Объект для хранения информации о текущем отзыве
         reviews = [];      // Массив для хранения всех отзывов
 
+    // ==============  Определение функций ================================================
     function clearInputs() {
         reviewerName.value = '';
         reviewPlace.value = '';
@@ -76,6 +77,31 @@ function init () {
         reviewForm.style.zIndex = '10';
     }
 
+    function addPlacemark(activeReview) {
+        let {coords, address, reviewer, place, date, text} = activeReview;
+        // let header = `<div class="balloon__place">${place}</div>
+        //               <div class="balloon__address">${address}</div>`;
+        let placemark = new ymaps.Placemark(coords, {
+            balloonContentHeader: `<div class="balloon__place">${place}</div><div class="balloon__address">${address}</div>`,
+            balloonContentBody: text,
+            balloonContentFooter: date,
+            hintContent: `<b>${reviewer}</b> ${place}`
+        }, {
+            preset: 'islands#redIcon',
+            iconColor: '#df6543',
+            openBalloonOnClick: false
+        });
+        // let address = activeReview.address;
+
+        // Обработчик щелчка на новом placemark
+        placemark.events.add('click', (e) => {
+            showForm(e.get('position'), address);
+        });
+
+        // Делаем placemark доступным для кластеризации
+        clusterer.add(placemark);
+    }
+
     function addReview() {
         activeReview.reviewer = reviewerName.value;
         activeReview.place = reviewPlace.value;
@@ -87,35 +113,74 @@ function init () {
             return;
         }
 
-        // Добавляем новый отзыв в список всех отзывов
+        // Добавляем новый отзыв в массив reviews всех отзывов
         reviews.push(Object.assign({}, activeReview));
-
-        let header = `<div class="balloon__place"> ${activeReview.place} </div><div class="balloon__address">${activeReview.address}</div>`;
-        let placemark = new ymaps.Placemark(activeReview.coords, {
-            balloonContentHeader: header,
-            balloonContentBody: activeReview.text,
-            balloonContentFooter: activeReview.date,
-            hintContent: `<b>${activeReview.reviewer}</b> ${activeReview.place}`
-        }, {
-            preset: 'islands#redIcon',
-            iconColor: '#df6543',
-            openBalloonOnClick: false
-        });
-        let address = activeReview.address;
-
-        // Обработчик щелчка на новом placemark
-        placemark.events.add('click', (e) => {
-            showForm(e.get('position'), address);
-        });
-
-        // Делаем placemark доступным для кластеризации
-        clusterer.add(placemark);
-
-        // Формируем и отображаем список всех отзывов по данному адресу
+        // Добавляем placemark на карту
+        addPlacemark(activeReview);
+        // Формируем и отображаем в форме список всех отзывов по данному адресу
         fillReviewList(activeReview.address);
+        // Очищаем поля ввода
         clearInputs();
     }
 
+    function getClustererWithCarousel() {
+        // Определение собственного макета для элемента карусели
+        let customItemContentLayout = ymaps.templateLayoutFactory.createClass(
+            // Флаг "raw" означает, что данные вставляют "как есть" без экранирования html.
+            '<div class=balloon__header>{{ properties.balloonContentHeader|raw }}</div>' +
+            '<div class=balloon__body>{{ properties.balloonContentBody|raw }}</div>' +
+            '<div class=balloon__footer>{{ properties.balloonContentFooter|raw }}</div>'
+        );
+
+        return new ymaps.Clusterer({
+            preset: 'islands#invertedDarkOrangeClusterIcons',
+            openBalloonOnClick: true,
+            clusterDisableClickZoom: true,
+            clusterOpenBalloonOnClick: true,
+            clusterHideIconOnBalloonOpen: false,
+            // Устанавливаем для балуна кластера стандартный макет типа "Карусель".
+            clusterBalloonContentLayout: 'cluster#balloonCarousel',
+            // Устанавливаем собственный макет.
+            clusterBalloonItemContentLayout: customItemContentLayout,
+            // Устанавливаем режим открытия балуна.
+            // В данном примере балун никогда не будет открываться в режиме панели.
+            clusterBalloonPanelMaxMapArea: 0,
+            // Устанавливаем размеры макета контента балуна (в пикселях).
+            clusterBalloonContentLayoutWidth: 200,
+            clusterBalloonContentLayoutHeight: 130,
+            // Устанавливаем максимальное количество элементов в нижней панели на одной странице
+            clusterBalloonPagerSize: 5
+        });
+    }
+
+    // =========================================================================
+    let myMap = new ymaps.Map('map', {
+        center   : [54.17523457, 45.18074950], // Саранск
+        zoom     : 16,
+        behaviors: ['drag']
+    });
+    myMap.controls.add('zoomControl');
+
+    let clusterer = getClustererWithCarousel();
+    myMap.geoObjects.add(clusterer);
+
+    // ====================   Настройка обработчиков событий для элементов карты ================================
+    // По щелчку на карте определяется адрес точки и открывается форма с отзывами по этому адресу
+    myMap.events.add('click', e => {
+        let coords = e.get('coords'), // Географические координаты точки
+            position = e.get('position'); // Компьютерные координаты точки на экране
+
+        clearForm();
+        ymaps.geocode(coords)
+            .then(res => {
+                activeReview.coords = coords;
+                activeReview.address = res.geoObjects.get(0).getAddressLine();
+                showForm(position, activeReview.address);
+            })
+            .catch(err => console.error(err));
+    });
+
+    // ====================   Настройка обработчиков событий для DOM-элементов  ================================
     saveBtn.addEventListener('click', addReview);
     closeFormBtn.addEventListener('click', closeForm);
     //Обработка клика на адрес (класс address) в балуне-карусели для кластера
@@ -129,59 +194,6 @@ function init () {
 
             showForm([x, y], target.textContent);
         }
-    });
-
-
-    // -----------------------------------------------------------------------------------------
-    let myMap = new ymaps.Map('map', {
-        center   : [54.17523457, 45.18074950], // Саранск
-        zoom     : 16,
-        behaviors: ['drag']
-    });
-    myMap.controls.add('zoomControl');
-
-    // Создаем собственный макет с информацией о выбранном геообъекте.
-    let customItemContentLayout = ymaps.templateLayoutFactory.createClass(
-        // Флаг "raw" означает, что данные вставляют "как есть" без экранирования html.
-        '<div class=balloon__header>{{ properties.balloonContentHeader|raw }}</div>' +
-        '<div class=balloon__body>{{ properties.balloonContentBody|raw }}</div>' +
-        '<div class=balloon__footer>{{ properties.balloonContentFooter|raw }}</div>'
-    );
-    let clusterer = new ymaps.Clusterer({
-        preset: 'islands#invertedDarkOrangeClusterIcons',
-        openBalloonOnClick: true,
-        clusterDisableClickZoom: true,
-        clusterOpenBalloonOnClick: true,
-        clusterHideIconOnBalloonOpen: false,
-        // Устанавливаем стандартный макет балуна кластера "Карусель".
-        clusterBalloonContentLayout: 'cluster#balloonCarousel',
-        // Устанавливаем собственный макет.
-        clusterBalloonItemContentLayout: customItemContentLayout,
-        // Устанавливаем режим открытия балуна.
-        // В данном примере балун никогда не будет открываться в режиме панели.
-        clusterBalloonPanelMaxMapArea: 0,
-        // Устанавливаем размеры макета контента балуна (в пикселях).
-        clusterBalloonContentLayoutWidth: 200,
-        clusterBalloonContentLayoutHeight: 130,
-        // Устанавливаем максимальное количество элементов в нижней панели на одной странице
-        clusterBalloonPagerSize: 5
-    });
-    myMap.geoObjects.add(clusterer);
-
-    // По щелчку на карте определяется адрес точки и открывается форма с отзывами по этому адресу
-    myMap.events.add('click', e => {
-        let coords = e.get('coords'), // Географические координаты точки
-            position = e.get('position'); // Компьютерные координаты точки на экране
-
-        clearForm();
-
-        ymaps.geocode(coords)
-            .then(res => {
-                activeReview.coords = coords;
-                activeReview.address = res.geoObjects.get(0).getAddressLine();
-                showForm(position, activeReview.address);
-            })
-            .catch(err => console.log(err));
     });
 
 }
