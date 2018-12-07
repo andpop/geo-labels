@@ -126,7 +126,7 @@ function init () {
             return;
         }
 
-        // Добавляем новый отзыв в массив reviews всех отзывов
+        // Добавляем новый отзыв в массив allReviews всех отзывов
         allReviews.push(Object.assign({}, currentReview));
         saveReviewsToStorage();
         // Добавляем placemark на карту
