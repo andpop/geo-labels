@@ -1,7 +1,7 @@
 ymaps.ready(init);
 
 function init () {
-    let reviewForm = document.getElementById('review_form'),
+    let reviewForm = document.getElementById('review_form'),//View
         addressElement = document.getElementById('address'),
         closeFormBtn = document.getElementById('close_form'),
         reviewList = document.getElementById('review_list'),
@@ -11,8 +11,8 @@ function init () {
         reviewText = document.getElementById('review_text'),
         saveBtn = document.getElementById('saveBtn');
 
-    let currentReview = {}, // Объект для хранения информации о текущем отзыве
-        allReviews = [];      // Массив для хранения всех отзывов
+    let currentReview = {}, // Объект для хранения информации о текущем отзыве (Model)
+        allReviews = [];      // Массив для хранения всех отзывов (Model)
 
     // ==============  Определение функций ================================================
     function clearInputs() {
