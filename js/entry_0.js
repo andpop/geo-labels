@@ -18,6 +18,7 @@ class Model {
     }
 
     loadReviewsFromStorage() {
+        // return localStorage.geo_reviews ? JSON.parse(localStorage.geo_reviews) : {};
         return localStorage[this.localStoragiItem] ? JSON.parse(localStorage[this.localStoragiItem]) : [];
     }
 
@@ -30,21 +31,6 @@ class Presenter {
         this.myMap = this.createMap();
         this.clusterer = this.createClusterer();
         this.myMap.geoObjects.add(this.clusterer);
-
-        this.myMap.events.add('click', e => {
-            let coords = e.get('coords'), // Географические координаты точки
-                position = e.get('position'); // Компьютерные координаты точки на экране
-
-            // clearForm();
-            ymaps.geocode(coords)
-                .then(res => {
-                    this.model.currentReview.coords = coords;
-                    this.model.currentReview.address = res.geoObjects.get(0).getAddressLine();
-                    console.log(this.model.currentReview.address);
-                    // showForm(position, currentReview.address);
-                })
-                .catch(err => console.error(err));
-        });
     }
 
     createMap() {
@@ -116,29 +102,28 @@ class Presenter {
     }
 
     addAllPlacemarks() {
-        this.model.allReviews
+        model.allReviews
             .forEach((review, i, reviews) => this.addPlacemark(review));
     }
 }
 
 function init () {
     let presenter = new Presenter();
-    presenter.addAllPlacemarks();
 
-    // const localStorageItem = 'geo_reviews';
+    const localStorageItem = 'geo_reviews';
 
-    // let reviewForm = document.getElementById('review_form'),//View
-    //     addressElement = document.getElementById('address'),
-    //     closeFormBtn = document.getElementById('close_form'),
-    //     reviewList = document.getElementById('review_list'),
-    //     emptyMessage = document.getElementById('empty_message'),
-    //     reviewerName = document.getElementById('reviewer_name'),
-    //     reviewPlace = document.getElementById('place'),
-    //     reviewText = document.getElementById('review_text'),
-    //     saveBtn = document.getElementById('saveBtn');
+    let reviewForm = document.getElementById('review_form'),//View
+        addressElement = document.getElementById('address'),
+        closeFormBtn = document.getElementById('close_form'),
+        reviewList = document.getElementById('review_list'),
+        emptyMessage = document.getElementById('empty_message'),
+        reviewerName = document.getElementById('reviewer_name'),
+        reviewPlace = document.getElementById('place'),
+        reviewText = document.getElementById('review_text'),
+        saveBtn = document.getElementById('saveBtn');
 
-    // let currentReview = {}, // Объект для хранения информации о текущем отзыве (Model)
-    //     allReviews = [];      // Массив для хранения всех отзывов (Model)
+    let currentReview = {}, // Объект для хранения информации о текущем отзыве (Model)
+        allReviews = [];      // Массив для хранения всех отзывов (Model)
 
     // ==============  Определение функций ================================================
     function clearInputs() {
@@ -292,18 +277,49 @@ function init () {
     }
 
     // =========================================================================
-    // let myMap = new ymaps.Map('map', {
-    //     center   : [54.17523457, 45.18074950], // Саранск
-    //     zoom     : 16,
-    //     behaviors: ['drag']
-    // });
-    // myMap.controls.add('zoomControl');
-    //
-    // let clusterer = getClustererWithCarousel();
-    // myMap.geoObjects.add(clusterer);
+    let myMap = new ymaps.Map('map', {
+        center   : [54.17523457, 45.18074950], // Саранск
+        zoom     : 16,
+        behaviors: ['drag']
+    });
+    myMap.controls.add('zoomControl');
 
-    // allReviews = loadReviewsFromStorage();
-    // allReviews.forEach((review, i, reviews) => addPlacemark(review));
+    let clusterer = getClustererWithCarousel();
+    myMap.geoObjects.add(clusterer);
 
+    allReviews = loadReviewsFromStorage();
+    allReviews.forEach((review, i, reviews) => addPlacemark(review));
+
+    // ====================   Настройка обработчиков событий для элементов карты ================================
+    // По щелчку на карте определяется адрес точки и открывается форма с отзывами по этому адресу
+    myMap.events.add('click', e => {
+        let coords = e.get('coords'), // Географические координаты точки
+            position = e.get('position'); // Компьютерные координаты точки на экране
+
+        clearForm();
+        ymaps.geocode(coords)
+            .then(res => {
+                currentReview.coords = coords;
+                currentReview.address = res.geoObjects.get(0).getAddressLine();
+                showForm(position, currentReview.address);
+            })
+            .catch(err => console.error(err));
+    });
+
+    // ====================   Настройка обработчиков событий для DOM-элементов  ================================
+    saveBtn.addEventListener('click', addReview);
+    closeFormBtn.addEventListener('click', closeForm);
+    //Обработка клика на адрес (класс address) в балуне-карусели для кластера
+    map.addEventListener('click', e => {
+        let target = e.target;
+
+        if (target.className === 'balloon__address') {
+            myMap.balloon.close();
+            const x = e.clientX;
+            const y = e.clientY;
+
+            showForm([x, y], target.textContent);
+        }
+    });
 
 }
