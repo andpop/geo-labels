@@ -1,8 +1,91 @@
 ymaps.ready(init);
 
-class View {
+class GeoReviewForm {
     constructor() {
         this.reviewForm = document.getElementById('review_form');
+        this.addressElement = document.getElementById('address');
+        this.closeFormBtn = document.getElementById('close_form');
+        this.reviewList = document.getElementById('review_list');
+        this.emptyMessage = document.getElementById('empty_message');
+        this.reviewerName = document.getElementById('reviewer_name');
+        this.reviewPlace = document.getElementById('place');
+        this.reviewText = document.getElementById('review_text');
+        this.saveBtn = document.getElementById('saveBtn');
+    }
+
+    clearInputs() {
+        this.reviewerName.value = '';
+        this.reviewPlace.value = '';
+        this.reviewText.value = '';
+    }
+
+    clearForm() {
+        this.addressElement.textContent = '';
+        this.clearInputs();
+        this.clearList();
+    }
+
+    clearList() {
+        this.reviewList.innerHTML = '';
+        this.emptyMessage.style.display = 'block';
+    }
+
+    closeForm() {
+        this.clearForm();
+        this.clearList();
+        this.reviewForm.style.display = 'none';
+    }
+
+    // fillReviewList(address, content) {
+    //     this.reviewList.innerHTML = content;
+    //     // TODO: content нужно формировать в presentor
+    //
+    //     // for (let review of allReviews) {
+    //     //     if (review.address === address) {
+    //     //         emptyMessage.style.display = 'none';
+    //     //         currentReview.address = review.address;
+    //     //         currentReview.coords = review.coords;
+    //     //
+    //     //         let reviewItem = `<li>
+    //     //         <span class="username">${review.reviewer} </span>
+    //     //         <span class="place"> ${review.place}</span> <span class="date">${review.date}</span>
+    //     //         <div class="review-text">${review.text}</div>
+    //     //         </li>`;
+    //     //         reviewList.innerHTML += reviewItem;
+    //     //     }
+    //     // }
+    // }
+
+
+    // TODO: reviewList нужно вычислять во presentor
+    showForm(position, address, reviewList) {
+        this.addressElement.textContent = address;
+        this.reviewList.innerHTML = reviewList;
+        // fillReviewList(address);
+        this.reviewerName.focus();
+
+        let {x, y} = position;
+        // TODO: x, y нужно вычислять во view
+
+        // x = x < 0 ? 0 : x;
+        // if (x + reviewForm.offsetWidth > document.documentElement.clientWidth) {
+        //     x = document.documentElement.clientWidth - reviewForm.offsetWidth - 10;
+        // }
+        // y = y < 0 ? 0 : y;
+        // if (y + reviewForm.offsetHeight > document.documentElement.clientHeight) {
+        //     y = document.documentElement.clientHeight - reviewForm.offsetHeight - 10;
+        // }
+        this.reviewForm.style.left = x +'px';
+        this.reviewForm.style.top = y + 'px';
+        this.reviewForm.style.display = 'block';
+        this.reviewForm.style.zIndex = '10';
+    }
+
+}
+
+class View {
+    constructor() {
+        // this.reviewForm = document.getElementById('review_form');
     }
 }
 
@@ -125,20 +208,6 @@ function init () {
     let presenter = new Presenter();
     presenter.addAllPlacemarks();
 
-    // const localStorageItem = 'geo_reviews';
-
-    // let reviewForm = document.getElementById('review_form'),//View
-    //     addressElement = document.getElementById('address'),
-    //     closeFormBtn = document.getElementById('close_form'),
-    //     reviewList = document.getElementById('review_list'),
-    //     emptyMessage = document.getElementById('empty_message'),
-    //     reviewerName = document.getElementById('reviewer_name'),
-    //     reviewPlace = document.getElementById('place'),
-    //     reviewText = document.getElementById('review_text'),
-    //     saveBtn = document.getElementById('saveBtn');
-
-    // let currentReview = {}, // Объект для хранения информации о текущем отзыве (Model)
-    //     allReviews = [];      // Массив для хранения всех отзывов (Model)
 
     // ==============  Определение функций ================================================
     function clearInputs() {
