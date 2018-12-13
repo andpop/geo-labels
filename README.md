@@ -10,7 +10,7 @@
 Приложение в процедурном стилие - ветка procedural-style-with-global-variables
 
 Приложение в ООП-стиле по шаблону Model_View_Presenter - ветка oop-mvp  
-Для сборки использовал parcel:
+Для сборки использовал  parcel:
 ```
 npm install -g parcel-bundler
 npm init
