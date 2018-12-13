@@ -1,0 +1,11 @@
+{
+  "name": "geo-labels",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:andpop/geo-labels.git",
+  "author": "Andrey Popov <andpop@mail.ru>",
+  "license": "MIT",
+  "devDependencies": {
+    "cssnano": "^4.1.7"
+  }
+}
