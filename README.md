@@ -5,6 +5,7 @@
 и сохранения этих меток в Local Storage.
 
 Технологии: HTML5, CSS, JavaScript, API Яндекс.Карт
+
 Инструменты: бандлер parcel, git/github
 
 Приложение в процедурном стилие - ветка procedural-style-with-global-variables
