@@ -105,7 +105,7 @@ class View {
 class Model {
     constructor() {
         this.localStoragiItem = 'geo_reviews';
-        this.currentReview = {};
+        this.currentReview = {}; // {coords, address, reviewer, place, date, text}
         this.allReviews = this.loadReviewsFromStorage();
     }
 
@@ -123,6 +123,26 @@ class Model {
 
     addCurrentReviewInAllReviews() {
         this.allReviews.push(Object.assign({}, this.currentReview));
+    }
+
+    // Определение географических координат по адресу (из сохраненных записей в allReviews)
+    getCoordsByAddress(address) {
+        let coords = [];
+
+        for (let review of this.allReviews) {
+            if (review.address === address) {
+                coords = [...review.coords];
+                break;
+            }
+        }
+
+        return coords;
+    }
+
+    // Заполнение адреса и географических координат в объекте currentReview
+    fillCurrentReview(address) {
+        this.currentReview.address = address;
+        this.currentReview.coords = this.getCoordsByAddress(address);
     }
 }
 
@@ -169,6 +189,7 @@ class Presenter {
                 }
                 let address = target.textContent;
 
+                this.model.fillCurrentReview(address);
                 this.myMap.balloon.close();
                 this.view.geoReviewForm.showForm(
                     this.view.getFormOffsets(position),
@@ -240,6 +261,7 @@ class Presenter {
 
         // Обработчик щелчка на новом placemark (address берется по замыканию)
         placemark.events.add('click', (e) => {
+            this.model.fillCurrentReview(address);
             this.view.geoReviewForm.showForm(
                 this.view.getFormOffsets(e.get('position')),
                 address,
